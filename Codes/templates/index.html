@@ -1,12 +1,24 @@
 <!doctype html>
 <html>
     <head>
-
+        <style>
+            
+            .SearchBar{
+                position: absolute;
+                border:3px solid black;
+                top: 5%;
+                width:99%;
+                text-align: center;
+            }
+            
+        </style>
     </head>
     <body>
-        <h2>Search</h2>
-        <form action="/result/" method="get">
-            <input type="text" name="keyword" id="keyword"/>
-        </form>
+        <div class=SearchBar>
+            <h1>Search</h1>
+                <form action="/result/" method="get">
+                    <input size=50 type="text" name="keyword" id="keyword"/>
+                </form>
+        </div>
     </body>
 </html>
