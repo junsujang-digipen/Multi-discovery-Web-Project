@@ -11,72 +11,142 @@ def index():
         name = request.args.get("keyword")
         #print(request.form)
         
-    return htmlFunc.basicHtml(head = htmlFunc.styles(),body = htmlFunc.searchBarHtml())
+    return htmlFunc.basicHtmlSearch(siteLists = ['Google'])
 
 @app.route('/result/')
 def search():
     print("ssssssssssssssssssssssssssssssssssssssssssssssss")
     if request.method == 'GET':
         name = request.args.get("keyword")
-        GoogleWebpage = requests.get("https://www.google.com/search?q={}".format(name))
-        soup = BeautifulSoup(GoogleWebpage.text,"html.parser")
-        div = soup.find("div",id = "main")
-        a = [d.find("a") for d in div]
+        CheckedSiteLists = request.args.getlist("selected")
+        CheckedSiteListsNum = len(CheckedSiteLists)
+        width = 0
+        left = 9
+        leftInterval = 0
+        margin = 4
+        if CheckedSiteListsNum == 1:
+            width = 80
+        elif CheckedSiteListsNum == 2:
+            width = 39
+            leftInterval = width + margin
+        elif CheckedSiteListsNum == 3 or CheckedSiteListsNum == 4:
+            width = 25
+            leftInterval = width + margin
 
-        GoogleHrefs = []
-        GoogleSearchRes = []
-        for t in a:
-            # print(t)
-            # print("\n")
-            if t == None:
-                continue
-            if t.get("href")[:4] == "/url":
-                temp = str(t).replace("/url?q=","")
-                first = temp.find("&")
-                second = temp.find(">")
-                temp = temp.replace(temp[first:second],'"')
-                GoogleHrefs.append(t.get("href"))
-                GoogleSearchRes.append(temp)
-        # print("G  hrefs")
-        # print(GoogleHrefs)
-        # print("G searchRes")
-        # print(GoogleSearchRes)
+        print(CheckedSiteLists)
+        if name !="":
+            Res = []
 
-        NaverWebpage = requests.get("https://search.naver.com/search.naver?query={}".format(name))
-        soup = BeautifulSoup(NaverWebpage.text,"html.parser")
-        div = soup.find("div",id = "main_pack")
-        a = div.select("a")
-        NaverHrefs = []
-        NaverSearchRes = []
-        for t in a:
-            if t == None or t == -1 or t.get("href") == None:
-                continue
-            if str(t).find(name) == -1:
-                continue
-            if t.get("href")[:4] == "http":
-                if str(t).find("svg") == -1: 
-                    NaverHrefs.append(t.get("href"))
-                    NaverSearchRes.append(str(t))
+            if 'Google' in CheckedSiteLists:
+                GoogleWebpage = requests.get("https://www.google.com/search?q={}".format(name))
+                soup = BeautifulSoup(GoogleWebpage.text,"html.parser")
+                div = soup.find("div",id = "main")
+                a = [d.find("a") for d in div]
 
-        
-        print("ssssssssssssssssssssssssssssssssssssssssssssssss")
-        Res = []
-        Res.append("<div class = searchResult  style=\"width:39%;left:9%;\">")
-        Res.append("<h2 text-align=center style=\"color:black;\">Google search results</h2>")
-    
-        for r in GoogleSearchRes:
-            Res.append(r)
+                GoogleHrefs = []
+                GoogleSearchRes = []
+                for t in a:
+                    # print(t)
+                    # print("\n")
+                    if t == None:
+                        continue
+                    if t.get("href")[:4] == "/url":
+                        temp = str(t).replace("/url?q=","")
+                        first = temp.find("&")
+                        second = temp.find(">")
+                        temp = temp.replace(temp[first:second],'"')
+                        GoogleHrefs.append(t.get("href"))
+                        GoogleSearchRes.append(temp)
+                # print("G  hrefs")
+                # print(GoogleHrefs)
+                # print("G searchRes")
+                # print(GoogleSearchRes)
+                Res.append("<div class = searchResult  style=\"width:{}%;left:{}%;\">".format(width,left))
+                left += leftInterval
+                Res.append("<h2 text-align=center style=\"color:black;\">Google search results</h2>")
+                for r in GoogleSearchRes:
+                    Res.append(r)
+                Res.append("</div>")
+
+            if 'Naver' in CheckedSiteLists:
+                NaverWebpage = requests.get("https://search.naver.com/search.naver?query={}".format(name))
+                soup = BeautifulSoup(NaverWebpage.text,"html.parser")
+                div = soup.find("div",id = "main_pack")
+                a = div.select("a")
+                NaverHrefs = []
+                NaverSearchRes = []
+                for t in a:
+                    if t == None or t == -1 or t.get("href") == None:
+                        continue
+                    if str(t).find(name) == -1:
+                        continue
+                    if t.get("href")[:4] == "http":
+                        if str(t).find("svg") == -1: 
+                            NaverHrefs.append(t.get("href"))
+                            NaverSearchRes.append(str(t))
+                Res.append("<div class = searchResult style=\"width:{}%; left:{}%;\">".format(width,left))
+                left += leftInterval
+                Res.append("<h2 text-align=center style=\"color:black;\">Naver search results</h2>")
+
+                for r in NaverSearchRes:
+                    Res.append(r)
+                Res.append("</div>")
+
+            if 'YaHoo' in CheckedSiteLists:
+                Webpage = requests.get("https://search.yahoo.com/search?p={}".format(name))
+                soup = BeautifulSoup(Webpage.text,"html.parser")
+                div = soup.find("div",id = "main")
+                a = div.select("a")
+                Hrefs = []
+                SearchRes = []
+                for t in a:
+                    if t == None or t == -1 or t.get("href") == None:
+                        continue
+                    if str(t).find(name) == -1:
+                        continue
+                    if t.get("href")[:4] == "http":
+                        #if str(t).find("svg") == -1: 
+                        Hrefs.append(t.get("href"))
+                        SearchRes.append(str(t))
+                Res.append("<div class = searchResult style=\"width:{}%; left:{}%;\">".format(width,left))
+                left += leftInterval
+                Res.append("<h2 text-align=center style=\"color:black;\">YaHoo search results</h2>")
+
+                for r in SearchRes:
+                    Res.append(r)
+                Res.append("</div>")
+
+            if 'YouTube' in CheckedSiteLists:
+                Webpage = requests.get("https://www.youtube.com/results?search_query={}".format(name))
+                soup = BeautifulSoup(Webpage.text,"html.parser")
+                a = soup.findAll("a",id="video-title")
+                
+                #print(div)
+                #return Webpage.text
+                #a = div.select("a")
+                Hrefs = []
+                SearchRes = []
+                for t in a:
+                    if t == None or t == -1 or t.get("href") == None:
+                        continue
+                    if str(t).find(name) == -1:
+                        continue
+                    if t.get("href")[:4] == "/wat":
+                        #if str(t).find("svg") == -1: 
+                        Hrefs.append(t.get("href"))
+                        SearchRes.append(str(t))
+                Res.append("<div class = searchResult style=\"width:{}%; left:{}%;\">".format(width,left))
+                left += leftInterval
+                Res.append("<h2 text-align=center style=\"color:black;\">YouTube search results</h2>")
+
+                for r in SearchRes:
+                    Res.append(r)
+                Res.append("</div>")
+            print("ssssssssssssssssssssssssssssssssssssssssssssssss")
             
-        Res.append("</div>")
-        Res.append("<div class = searchResult style=\"width:40%; left:51%;\">")
-        Res.append("<h2 text-align=center style=\"color:black;\">Naver search results</h2>")
-
-        for r in NaverSearchRes:
-            Res.append(r)
-            
-        Res.append("</div>")
-
-    return htmlFunc.basicHtmlSearch(Res)
+            return htmlFunc.basicHtmlSearch(Addition = Res,siteLists = CheckedSiteLists,searchVal=name)
+        return htmlFunc.basicHtmlSearch(siteLists = CheckedSiteLists)
+    return htmlFunc.basicHtmlSearch()
 
 #,{"class":"BNeawe vvjwJb AP7Wnd"}
 #GyAeWb , rso , search , id="res" , role="main"

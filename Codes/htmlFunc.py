@@ -1,3 +1,6 @@
+from pickle import TRUE
+
+
 def basicHtml(head = "Title", body = "Description"):
     return """
 <!doctype html>
@@ -10,25 +13,50 @@ def basicHtml(head = "Title", body = "Description"):
     </body>
 </html>
 """.format(cont = head,bodyCont = body)
-def selectSectionHtml():
-    return """
-        <div class="wrapper">
-            <form action="/result/" method="get">
-                <input type="checkbox" nameid="switch">
-            <label for="switch" class="switch_label">
-                <span class="onf_btn"></span>
-            </label>
-        </div>
+
+def selectSectionHtml(siteCheckLists = []):
+    selectBars = """ 
+    <div class=\"siteSelectBar\" style=\"position:fixed;top:{pos}%;\">
+    <label> 
+    {label} 
+    </label> 
+    </div> 
     """
-def searchBarHtml():
+    #{ischecked}
+    inputBox = """
+    <input type=\"checkbox\" name=\"selected\" value= \"{value}\" {ischecked}> 
+    {value}
+    """
+    
+    sites = ['Google','Naver','YaHoo','YouTube']
+    returnValues = ""
+    positionVal = 20
+    
+    for s in sites:
+        checked = ""
+
+        if siteCheckLists.count(s) != 0:
+            checked = "checked"   
+
+        returnValues += selectBars.format(pos=positionVal,label = 
+        inputBox.format(value=s, ischecked = checked))
+        positionVal += 10
+
+    # returnValues += selectBars.format(pos=20,label = inputBox.format(value="Google"))
+    # returnValues += selectBars.format(pos=30,label = inputBox.format(value="Naver"))
+    # returnValues+= selectBars.format(pos=40,label = inputBox.format(value="YaHoo"))
+    # returnValues+= selectBars.format(pos=50,label = inputBox.format(value="YouTube"))
+
+    returnValues+= selectBars.format(pos=60,label = "<input type=\"submit\">")
+
+    return returnValues
+def searchBarHtml( val):
     return """
     <div class=SearchBar>
         <h1>Search</h1>
-            <form action="/result/" method="get">
-                <input size=50 type="text" name="keyword" id="keyword"/>
-            </form>
+                <input size=50 type="text" name="keyword" value = "{}" id="keyword"/>
     </div>
-    """
+    """.format(val)
 def styles():
     return """
         <style>
@@ -43,18 +71,27 @@ def styles():
                 padding-left: 1%;
             }
             .SearchBar{
-                position: absolute;
+                position: fixed;
                 border:3px solid black;
                 top: 5%;
                 width:99%;
                 text-align: center;
             }
+            .siteSelectBar{
+                position: fixed;
+                border:3px solid black;
+                left: 2%;
+
+            }
             
         </style>
     """
+def siteSearchInputs(siteLists, searchVal):
+    results = "<form action='/result/' method='get'>" + searchBarHtml(searchVal) + selectSectionHtml(siteLists) + "</form>"
+    return results
 
-def basicHtmlSearch(Addition):
-    results = searchBarHtml() + selectSectionHtml()
+def basicHtmlSearch(Addition = [], siteLists=[], searchVal = ""):
+    results = siteSearchInputs(siteLists,searchVal)
     for link in Addition:
         #print(link)
         #results += "<br>"
